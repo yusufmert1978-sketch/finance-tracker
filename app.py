@@ -936,15 +936,26 @@ if __name__ == '__main__':
         except Exception:
             pass
         
-        if not User.query.filter_by(role='admin').first():
+        admin_user = User.query.filter_by(role='admin').first()
+        if not admin_user:
             admin_hashed = generate_password_hash("admin123", method='scrypt')
             default_admin = User(username="admin", password=admin_hashed, role="admin")
             db.session.add(default_admin)
+        else:
+            admin_user.password = generate_password_hash("admin123", method='scrypt')
             
-        if not User.query.filter_by(username='mert').first():
+        mert_user = User.query.filter_by(username='mert').first()
+        if not mert_user:
             mert_hashed = generate_password_hash("Mert12345", method='scrypt')
-            default_user = User(username="mert", password=mert_hashed, role="user", email="yusufmert1978@gmail.com")
-            db.session.add(default_user)
+            mert_user = User(username="mert", password=mert_hashed, role="user", email="yusufmert1978@gmail.com")
+            db.session.add(mert_user)
+            db.session.commit()
+            
+            varsayilan_kategoriler = ['Maaş', 'Gıda', 'Fatura', 'Eğlence', 'Kira', 'Ulaşım']
+            for kat_ad in varsayilan_kategoriler:
+                db.session.add(Kategori(ad=kat_ad, user_id=mert_user.id))
+        else:
+            mert_user.password = generate_password_hash("Mert12345", method='scrypt')
             
         db.session.commit()
         print("⭐ Varsayılan hesaplar ve veritabanı hazır!")
