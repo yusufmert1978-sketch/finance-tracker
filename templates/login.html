@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Giriş Yap - Mert Finans</title>
+    <title>Giriş Yap - Finance Tracker</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💵</text></svg>">
     <!-- Google Font: Plus Jakarta Sans -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -147,15 +147,6 @@
             text-decoration: underline;
         }
 
-        .badge-secure {
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-            font-size: 11px;
-            color: #64748b;
-            margin-top: 20px;
-        }
-
         .demo-box {
             margin-top: 22px;
             padding: 14px 16px;
@@ -208,7 +199,7 @@
 
     <div class="login-card">
         <div class="brand-logo">💵</div>
-        <h2>Mert Finans</h2>
+        <h2>Finance Tracker</h2>
         <p class="subtitle">Finansal Yönetim Platformuna Giriş Yapın</p>
         
         {% with messages = get_flashed_messages() %}
@@ -230,15 +221,11 @@
                 <input type="password" name="password" placeholder="••••••••" required>
             </div>
 
-            <button type="submit">Güvenli Giriş Yap →</button>
+            <button type="submit">Giriş Yap →</button>
         </form>
 
         <div class="footer-links">
             <p>Hesabınız yok mu? <a href="{{ url_for('register') }}">Hemen Kayıt Olun</a></p>
-        </div>
-
-        <div class="badge-secure">
-            <span>🔒 256-Bit SSL Güvenli Bağlantı</span>
         </div>
 
         <div class="demo-box">

@@ -1,4 +1,4 @@
-# 💵 Mert Finans - Kişisel & Kurumsal Finansal Yönetim Sistemi
+# 💵 Finance Tracker - Kişisel & Kurumsal Finansal Yönetim Sistemi
 
 [![Python](https://img.shields.io/badge/Python-3.10%2B-blue.svg?logo=python&logoColor=white)](https://www.python.org/)
 [![Flask](https://img.shields.io/badge/Flask-3.x-black.svg?logo=flask&logoColor=white)](https://palletsprojects.com/p/flask/)
@@ -6,7 +6,7 @@
 [![Chart.js](https://img.shields.io/badge/Charts-Chart.js-FF6384.svg?logo=chartdotjs&logoColor=white)](https://www.chartjs.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-Bireysel kullanıcılar ve şirketler için gelir, gider, bütçe planlaması, abonelik takibi ve finansal durum analizini tek bir modern çatı altında toplayan kapsamlı bir finansal yönetim web uygulamasıdır.
+**Finance Tracker**, bireysel kullanıcılar ve kurumlar için gelir, gider, bütçe planlaması, abonelik takibi ve finansal durum analizini tek bir çatı altında toplayan modern bir finansal yönetim web uygulamasıdır.
 
 ---
 
@@ -75,8 +75,8 @@ Projeyi yerelinizde çalıştırdığınızda otomatik olarak aşağıdaki test 
 
 ### 1. Repoyu Klonlayın
 ```bash
-git clone https://github.com/yusufmert1978-sketch/mert-finans.git
-cd mert-finans
+git clone https://github.com/yusufmert1978-sketch/finance-tracker.git
+cd finance-tracker
 ```
 
 ### 2. Sanal Ortam (Virtual Environment) Oluşturun ve Aktifleştirin

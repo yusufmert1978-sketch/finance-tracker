@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mert Finans - Yönetim Paneli</title>
+    <title>Finance Tracker - Yönetim Paneli</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💵</text></svg>">
     <!-- Google Font: Plus Jakarta Sans -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -470,7 +470,7 @@
 
         <!-- 🏷️ Üst Başlık & Butonlar -->
         <div class="header">
-            <h2>📊 Finans Yönetimi: <span style="color: var(--primary);">{{ bakilan_user.username }}</span></h2>
+            <h2>📊 Finance Tracker: <span style="color: var(--primary);">{{ bakilan_user.username }}</span></h2>
             <div class="header-actions">
                 <button onclick="toggleTheme()" class="btn-nav btn-theme" id="theme-btn">🌙 Karanlık Mod</button>
                 {% if session['role'] == 'admin' %}

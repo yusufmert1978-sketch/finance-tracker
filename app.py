@@ -9,7 +9,7 @@ import csv
 import io
 
 app = Flask(__name__)
-app.secret_key = os.environ.get('SECRET_KEY', 'mert_ozel_2026_finans')
+app.secret_key = os.environ.get('SECRET_KEY', 'finance_tracker_secret_2026')
 
 # Veritabanı Yapılandırması
 base_dir = os.path.abspath(os.path.dirname(__file__))
@@ -679,7 +679,7 @@ def rapor_excel(user_id):
     xml_parts.append(' xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"')
     xml_parts.append(' xmlns:html="http://www.w3.org/TR/REC-html40">')
     xml_parts.append(' <DocumentProperties xmlns="urn:schemas-microsoft-com:office:office">')
-    xml_parts.append('  <Author>Mert Finans</Author>')
+    xml_parts.append('  <Author>Finance Tracker</Author>')
     xml_parts.append('  <Title>Resmi Finans Raporu</Title>')
     xml_parts.append(' </DocumentProperties>')
     xml_parts.append(' <Styles>')
@@ -807,7 +807,7 @@ def rapor_excel(user_id):
     
     # 1. Başlık Alanı
     xml_parts.append('   <Row ss:Height="26">')
-    xml_parts.append('    <Cell ss:MergeAcross="5" ss:StyleID="MainTitle"><Data ss:Type="String">MERT FİNANSAL YÖNETİM SİSTEMİ</Data></Cell>')
+    xml_parts.append('    <Cell ss:MergeAcross="5" ss:StyleID="MainTitle"><Data ss:Type="String">FINANCE TRACKER YÖNETİM SİSTEMİ</Data></Cell>')
     xml_parts.append('   </Row>')
     xml_parts.append('   <Row ss:Height="18">')
     xml_parts.append('    <Cell ss:MergeAcross="5" ss:StyleID="Subtitle"><Data ss:Type="String">Resmi Müşteri Hesap Ekstresi ve Finansal Durum Raporu</Data></Cell>')
