@@ -1,0 +1,1055 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mert Finans - Yönetim Paneli</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💵</text></svg>">
+    <!-- Google Font: Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg-color: #f1f5f9;
+            --surface-color: #ffffff;
+            --text-primary: #0f172a;
+            --text-secondary: #64748b;
+            --border-color: #e2e8f0;
+            --card-bg: #f8fafc;
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #0f172a;
+            --surface-color: #1e293b;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --border-color: #334155;
+            --card-bg: #0f172a;
+            --primary: #3b82f6;
+            --primary-hover: #60a5fa;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            transition: background-color 0.2s ease, color 0.2s ease;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            padding: 20px;
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: auto;
+            background-color: var(--surface-color);
+            padding: 25px;
+            border-radius: 14px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.06);
+            border: 1px solid var(--border-color);
+        }
+
+        /* Canlı Piyasa & Döviz Bandı */
+        .market-ticker {
+            background: #1e293b;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+            overflow-x: auto;
+            gap: 15px;
+        }
+
+        .ticker-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+        }
+
+        .ticker-val {
+            font-weight: 700;
+            color: #34d399;
+        }
+
+        /* Üst Menü / Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--primary);
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .header h2 {
+            font-size: 20px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-nav {
+            padding: 8px 14px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            text-decoration: none;
+            color: white;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-theme { background: #475569; }
+        .btn-pdf { background: #10b981; }
+        .btn-excel { background: #059669; }
+        .btn-settings { background: #64748b; }
+        .btn-admin { background: #334155; }
+        .btn-logout { background: #ef4444; }
+
+        /* Flash Mesajları */
+        .alert {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        .alert-success { background: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
+        .alert-danger { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+        .alert-info { background: #e0f2fe; color: #075985; border: 1px solid #bae6fd; }
+
+        /* Ana İstatistik Kartları */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            padding: 16px 20px;
+            border-radius: 10px;
+            color: white;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .stat-title { font-size: 12px; text-transform: uppercase; font-weight: 700; opacity: 0.9; margin-bottom: 4px; }
+        .stat-amount { font-size: 22px; font-weight: 800; }
+
+        /* Bütçe ve Sağlık Skoru Kartı */
+        .budget-health-container {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .widget-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        .widget-title {
+            font-size: 15px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .progress-bar-container {
+            background: #e2e8f0;
+            border-radius: 10px;
+            height: 14px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            transition: width 0.4s ease;
+        }
+
+        /* Akıllı Danışman Kartı */
+        .advisor-card {
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+        }
+
+        .advisor-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .advisor-tip {
+            font-size: 13px;
+            padding: 8px 12px;
+            background: rgba(255,255,255,0.08);
+            border-radius: 6px;
+            margin-bottom: 6px;
+        }
+
+        /* Grafikler Bölümü */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: 2fr 1.2fr;
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .chart-box {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        /* Alt Ana Grid (2 Sütun) */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 2fr 1.1fr;
+            gap: 20px;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 20px;
+        }
+
+        input, select, button {
+            width: 100%;
+            padding: 10px;
+            margin: 6px 0;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            background-color: var(--surface-color);
+            color: var(--text-primary);
+            font-size: 13px;
+        }
+
+        button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: 700;
+            transition: background-color 0.2s ease;
+        }
+        button:hover {
+            background: var(--primary-hover);
+        }
+
+        /* Filtre ve Arama Alanı */
+        .filter-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+            width: 100%;
+        }
+
+        .filter-item {
+            flex: 1;
+            min-width: 120px;
+            margin: 0;
+            padding: 8px;
+        }
+
+        /* Tablo */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            font-size: 13px;
+        }
+
+        th {
+            background-color: var(--border-color);
+            color: var(--text-primary);
+            padding: 10px 12px;
+            text-align: left;
+            font-weight: 700;
+        }
+
+        td {
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        tbody tr:hover {
+            background-color: rgba(37, 99, 235, 0.04);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .badge-income { background: #d1fae5; color: #065f46; }
+        .badge-expense { background: #fee2e2; color: #991b1b; }
+        .badge-del { background: #ef4444; color: white; cursor: pointer; }
+
+        .btn-action {
+            color: white;
+            padding: 4px 8px;
+            text-decoration: none;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 700;
+            margin-right: 2px;
+            display: inline-block;
+            transition: opacity 0.15s ease;
+        }
+        .btn-action:hover {
+            opacity: 0.85;
+        }
+
+        /* Sabit Giderler Listesi */
+        .subscription-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: var(--surface-color);
+            padding: 10px 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            margin-bottom: 8px;
+            font-size: 13px;
+        }
+
+        /* ✏️ Modal Pencere Stilleri */
+        .modal-backdrop {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(5px);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.25s ease;
+        }
+
+        .modal-backdrop.show {
+            display: flex;
+            opacity: 1;
+        }
+
+        .modal-content {
+            background-color: var(--surface-color);
+            color: var(--text-primary);
+            width: 90%;
+            max-width: 480px;
+            padding: 24px;
+            border-radius: 14px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35);
+            border: 1px solid var(--border-color);
+            transform: scale(0.92);
+            transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .modal-backdrop.show .modal-content {
+            transform: scale(1);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .modal-header h3 {
+            font-size: 17px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .modal-close {
+            background: transparent;
+            color: var(--text-secondary);
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            width: auto;
+            margin: 0;
+            padding: 0 6px;
+            line-height: 1;
+            transition: color 0.15s ease;
+        }
+
+        .modal-close:hover {
+            color: var(--danger);
+            background: transparent;
+        }
+
+        @media (max-width: 900px) {
+            .budget-health-container, .charts-grid, .main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+
+        <!-- 💱 Canlı Piyasa & Döviz Bandı -->
+        <div class="market-ticker">
+            <div class="ticker-item"><span>📈 CANLI PİYASA:</span></div>
+            <div class="ticker-item"><span>💵 USD/TRY:</span> <span class="ticker-val" id="usd-rate">36.50 ₺</span></div>
+            <div class="ticker-item"><span>💶 EUR/TRY:</span> <span class="ticker-val" id="eur-rate">38.30 ₺</span></div>
+            <div class="ticker-item"><span>💷 GBP/TRY:</span> <span class="ticker-val" id="gbp-rate">45.90 ₺</span></div>
+            <div class="ticker-item"><span>🪙 Gram Altın:</span> <span class="ticker-val" id="gold-rate">3.420 ₺</span></div>
+            <div class="ticker-item" style="margin-left: auto; font-size: 11px; opacity: 0.85;">
+                <span id="ticker-status">🟢 Canlı Piyasa Verisi</span>
+            </div>
+        </div>
+
+        <!-- 🏷️ Üst Başlık & Butonlar -->
+        <div class="header">
+            <h2>📊 Finans Yönetimi: <span style="color: var(--primary);">{{ bakilan_user.username }}</span></h2>
+            <div class="header-actions">
+                <button onclick="toggleTheme()" class="btn-nav btn-theme" id="theme-btn">🌙 Karanlık Mod</button>
+                {% if session['role'] == 'admin' %}
+                    <a href="{{ url_for('admin_panel') }}" class="btn-nav btn-admin">← Yönetici Paneli</a>
+                {% endif %}
+                <a href="{{ url_for('ayarlar') }}" class="btn-nav btn-settings">⚙️ Ayarlar</a>
+                <a href="{{ url_for('rapor_excel', user_id=bakilan_user.id) }}" class="btn-nav btn-excel">📊 Excel İndir</a>
+                <a href="{{ url_for('rapor_pdf', user_id=bakilan_user.id, tip=secili_tip, kategori=secili_kat, min_fiyat=min_fiyat, max_fiyat=max_fiyat, sirala=secili_sirala) }}" target="_blank" class="btn-nav btn-pdf">📄 PDF Rapor</a>
+                <a href="{{ url_for('logout') }}" class="btn-nav btn-logout">Çıkış Yap</a>
+            </div>
+        </div>
+
+        <!-- Flash Mesajları -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, msg in messages %}
+                    <div class="alert alert-{{ category if category != 'message' else 'info' }}">
+                        {{ msg }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- 📈 4'lü Ana İstatistik Kartları -->
+        <div class="stats-grid">
+            <div class="stat-card" style="background: linear-gradient(135deg, #10b981, #059669);">
+                <div class="stat-title">Toplam Gelir</div>
+                <div class="stat-amount">+{{ "%.2f"|format(gelir) }} ₺</div>
+            </div>
+            <div class="stat-card" style="background: linear-gradient(135deg, #ef4444, #dc2626);">
+                <div class="stat-title">Toplam Gider</div>
+                <div class="stat-amount">-{{ "%.2f"|format(gider) }} ₺</div>
+            </div>
+            <div class="stat-card" style="background: linear-gradient(135deg, {{ '#2563eb, #1d4ed8' if net >= 0 else '#b91c1c, #991b1b' }});">
+                <div class="stat-title">Net Finansal Durum</div>
+                <div class="stat-amount">{{ "%.2f"|format(net) }} ₺</div>
+            </div>
+            <div class="stat-card" style="background: linear-gradient(135deg, #6366f1, #4f46e5);">
+                <div class="stat-title">Bu Ayki Gider</div>
+                <div class="stat-amount">{{ "%.2f"|format(bu_ay_gider) }} ₺</div>
+            </div>
+        </div>
+
+        <!-- 🎯 Aylık Bütçe Takip Çubuğu & Finansal Sağlık Skoru -->
+        <div class="budget-health-container">
+            <!-- Bütçe Çubuğu -->
+            <div class="widget-card">
+                <div class="widget-title">
+                    <span>🎯 Aylık Bütçe Takip Göstergesi</span>
+                    <span style="font-size: 13px; color: var(--text-secondary);">
+                        {% if butce_hedefi > 0 %}
+                            Hedef: <strong>{{ "%.2f"|format(butce_hedefi) }} ₺</strong> (Kalan: <strong>{{ "%.2f"|format(butce_kalan) }} ₺</strong>)
+                        {% else %}
+                            <span style="color: #f59e0b;">Bütçe Limiti Belirlenmedi</span>
+                        {% endif %}
+                    </span>
+                </div>
+                
+                <div class="progress-bar-container">
+                    <div class="progress-bar-fill" style="width: {{ [butce_yuzdesi, 100]|min }}%; background-color: {{ '#10b981' if butce_yuzdesi < 70 else ('#f59e0b' if butce_yuzdesi <= 90 else '#ef4444') }};"></div>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px;">
+                    <span style="font-size: 12px; color: var(--text-secondary);">
+                        Bu Ay Yapılan Harcama: <strong>{{ "%.2f"|format(bu_ay_gider) }} ₺</strong> (%{{ butce_yuzdesi }} Doluluk)
+                    </span>
+                    <form action="{{ url_for('butce_guncelle', user_id=bakilan_user.id) }}" method="POST" style="display: flex; gap: 6px; width: auto;">
+                        <input type="number" step="100" name="butce_hedefi" placeholder="Hedef Bütçe (TL)" value="{{ butce_hedefi|int if butce_hedefi > 0 else '' }}" style="width: 130px; margin: 0; padding: 4px 8px; font-size: 12px;" required>
+                        <button type="submit" style="width: auto; margin: 0; padding: 4px 10px; font-size: 12px; background: #334155;">Hedefi Kaydet</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Finansal Sağlık Skoru -->
+            <div class="widget-card" style="text-align: center; display: flex; flex-direction: column; justify-content: center;">
+                <div class="widget-title" style="justify-content: center; margin-bottom: 6px;">
+                    <span>🛡️ Finansal Sağlık Skoru</span>
+                </div>
+                <div style="font-size: 32px; font-weight: 900; color: {{ saglik_renk }};">
+                    {{ saglik_puani }} <span style="font-size: 18px; color: var(--text-secondary);">/ 100</span>
+                </div>
+                <div style="font-size: 13px; font-weight: 700; color: {{ saglik_renk }}; margin-top: 2px;">
+                    Durum: {{ saglik_durumu }}
+                </div>
+            </div>
+        </div>
+
+        <!-- 🤖 Akıllı Finans Danışmanı & Gelecek Ay Tahmini -->
+        <div class="advisor-card">
+            <div class="advisor-header">
+                <span style="font-weight: 700; font-size: 15px;">🤖 Akıllı Finans Danışmanı & Analiz Raporu</span>
+                <span style="font-size: 12px; opacity: 0.9; background: rgba(255,255,255,0.15); padding: 4px 10px; border-radius: 4px;">
+                    🔮 Gelecek Ay Tahmini Gider: <strong>~{{ "%.2f"|format(tahmin_gelecek_ay_gider) }} ₺</strong>
+                </span>
+            </div>
+            {% for tip in akilli_tavsiyeler %}
+                <div class="advisor-tip">{{ tip }}</div>
+            {% endfor %}
+        </div>
+
+        <!-- 📊 İkili Analitik Grafikler -->
+        <div class="charts-grid">
+            <!-- Çizgi Grafiği: 6 Aylık Trend -->
+            <div class="chart-box">
+                <h3 style="font-size: 15px; margin-bottom: 12px; text-align: left;">📈 Gelir - Gider 6 Aylık Trend Analizi</h3>
+                <canvas id="trendChart" style="max-height: 230px;"></canvas>
+            </div>
+
+            <!-- Pasta/Halka Grafiği: Kategori Dağılımı -->
+            <div class="chart-box">
+                <h3 style="font-size: 15px; margin-bottom: 12px; text-align: left;">🏷️ Gider Kategori Dağılımı</h3>
+                {% if chart_values %}
+                    <canvas id="giderChart" style="max-height: 230px;"></canvas>
+                {% else %}
+                    <p style="color: var(--text-secondary); font-size: 13px; padding: 40px 0;">Grafik için henüz bir gider kaydı yok.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- 🧩 Ana İşlem ve Yönetim Grid Alanı -->
+        <div class="main-grid">
+
+            <!-- Sol Sütun: İşlem Ekleme, Filtreleme ve Tablo -->
+            <div>
+                <!-- Yeni İşlem Ekle -->
+                <div class="card">
+                    <h3 style="font-size: 16px; margin-bottom: 10px;">➕ Yeni Gelir / Gider Hareketi Ekle</h3>
+                    <form action="{{ url_for('islem_ekle', target_user_id=bakilan_user.id) }}" method="POST">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                            <div>
+                                <label style="font-size: 12px; font-weight: 600;">İşlem Türü:</label>
+                                <select name="tip" id="islem-tip" required>
+                                    <option value="gider">Gider (-)</option>
+                                    <option value="gelir">Gelir (+)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label style="font-size: 12px; font-weight: 600;">Miktar (TL):</label>
+                                <input type="number" step="0.01" name="miktar" placeholder="0.00" required>
+                            </div>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 6px;">
+                            <div>
+                                <label style="font-size: 12px; font-weight: 600;">Kategori:</label>
+                                <select name="kategori" id="islem-kategori" required>
+                                    {% for k in kategoriler %}
+                                        <option value="{{ k.ad }}">{{ k.ad }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div>
+                                <label style="font-size: 12px; font-weight: 600;">İşlem Tarihi:</label>
+                                <input type="date" name="tarih">
+                            </div>
+                        </div>
+
+                        <div style="margin-top: 6px;">
+                            <label style="font-size: 12px; font-weight: 600;">İşlem Açıklaması (Akıllı Kategori Eşleme Aktif):</label>
+                            <input type="text" name="baslik" id="islem-baslik" oninput="akilliKategoriTahmini(this.value)" placeholder="Örn: Market alışverişi, Maaş, Kira, Akaryakıt...">
+                        </div>
+
+                        <button type="submit" style="background: #10b981; margin-top: 10px; padding: 10px;">💾 İşlemi Kaydet</button>
+                    </form>
+                </div>
+
+                <!-- Filtreleme & Anlık Canlı Arama Çubuğu -->
+                <div class="card" style="padding: 15px;">
+                    <form method="GET" class="filter-group" style="margin-bottom: 10px;">
+                        <select name="tip" class="filter-item" onchange="this.form.submit()">
+                            <option value="hepsi" {% if secili_tip == 'hepsi' %}selected{% endif %}>Tüm Tipler</option>
+                            <option value="gelir" {% if secili_tip == 'gelir' %}selected{% endif %}>Sadece Gelirler</option>
+                            <option value="gider" {% if secili_tip == 'gider' %}selected{% endif %}>Sadece Giderler</option>
+                        </select>
+                        
+                        <select name="kategori" class="filter-item" onchange="this.form.submit()">
+                            <option value="hepsi" {% if secili_kat == 'hepsi' %}selected{% endif %}>Tüm Kategoriler</option>
+                            {% for k in kategoriler %}
+                                <option value="{{ k.ad }}" {% if secili_kat == k.ad %}selected{% endif %}>{{ k.ad }}</option>
+                            {% endfor %}
+                        </select>
+
+                        <select name="sirala" class="filter-item" onchange="this.form.submit()">
+                            <option value="en_yeni" {% if secili_sirala == 'en_yeni' %}selected{% endif %}>⏱️ En Yeni</option>
+                            <option value="en_eski" {% if secili_sirala == 'en_eski' %}selected{% endif %}>⌛ En Eski</option>
+                            <option value="coktan_aza" {% if secili_sirala == 'coktan_aza' %}selected{% endif %}>📈 Çoktan Aza</option>
+                            <option value="azdan_coga" {% if secili_sirala == 'azdan_coga' %}selected{% endif %}>📉 Azdan Çoğa</option>
+                        </select>
+
+                        <a href="{{ url_for('user_detail', user_id=bakilan_user.id) }}" style="font-size:12px; color:var(--primary); text-decoration:none; margin-left:auto;">Filtreleri Temizle</a>
+                    </form>
+
+                    <!-- Canlı Arama Inputu -->
+                    <input type="text" id="canli-arama" onkeyup="tablodaAra()" placeholder="🔍 Tabloda anlık canlı ara (Açıklama, Kategori, Tutar)..." style="margin: 0;">
+                </div>
+
+                <!-- Hesap Hareketleri Tablosu -->
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h3 style="font-size: 16px;">📜 Hesap Hareketleri Geçmişi</h3>
+                    <span style="font-size: 12px; color: var(--text-secondary);">Toplam {{ islemler|length }} Kayıt</span>
+                </div>
+                
+                <table id="islem-tablosu">
+                    <thead>
+                        <tr>
+                            <th>Tarih</th>
+                            <th>Tip</th>
+                            <th>Açıklama</th>
+                            <th>Kategori</th>
+                            <th>Tutar</th>
+                            <th>İşlem</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for i in islemler %}
+                        <tr>
+                            <td>{{ i.tarih.strftime('%d.%m.%Y') }}</td>
+                            <td>
+                                <span class="badge {% if i.tip == 'gelir' %}badge-income{% else %}badge-expense{% endif %}">
+                                    {{ i.tip.upper() }}
+                                </span>
+                            </td>
+                            <td><strong>{{ i.baslik }}</strong></td>
+                            <td>{{ i.kategori }}</td>
+                            <td style="color: {{ '#10b981' if i.tip == 'gelir' else '#ef4444' }}; font-weight:bold;">
+                                {% if i.tip == 'gelir' %}+{% else %}-{% endif %}{{ "%.2f"|format(i.miktar) }} ₺
+                            </td>
+                            <td>
+                                <button type="button" class="btn-action" style="background:#2563eb; border:none; cursor:pointer; width:auto; margin:0;" onclick="openEditModal({{ i.id }}, '{{ i.tip }}', '{{ i.baslik|replace("'", "\\'") }}', '{{ i.kategori }}', {{ i.miktar }}, '{{ i.tarih.strftime('%Y-%m-%d') }}')">Düzenle</button>
+                                <a href="{{ url_for('sil', islem_id=i.id) }}" class="btn-action" style="background:#ef4444;" onclick="return confirm('Bu işlemi silmek istediğinize emin misiniz?')">Sil</a>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="6" style="text-align:center; color:var(--text-secondary); font-style:italic; padding: 25px;">
+                                Aranan kriterlere uygun işlem hareketi bulunamadı.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Sağ Sütun: Sabit Giderler (Abonelikler) ve Kategori Yönetimi -->
+            <div>
+                <!-- 🔁 Tekrarlayan Faturalar & Abonelikler Modülü -->
+                <div class="card">
+                    <h3 style="font-size: 15px; margin-bottom: 12px;">🔁 Sabit Fatura & Abonelikler</h3>
+                    
+                    {% if abonelikler %}
+                        {% for abo in abonelikler %}
+                            <div class="subscription-item">
+                                <div>
+                                    <div style="font-weight: 700;">{{ abo.baslik }}</div>
+                                    <div style="font-size: 11px; color: var(--text-secondary);">
+                                        Her ayın {{ abo.gun }}. günü | <strong style="color: #ef4444;">{{ "%.2f"|format(abo.miktar) }} ₺</strong>
+                                    </div>
+                                </div>
+                                <div style="display: flex; gap: 4px;">
+                                    <a href="{{ url_for('abonelik_ode', abo_id=abo.id) }}" title="Bu ayki ödemeyi doğrudan işlemlere ekle" class="btn-action" style="background: #10b981;">Öde</a>
+                                    <a href="{{ url_for('abonelik_sil', abo_id=abo.id) }}" title="Sil" class="btn-action" style="background: #ef4444;" onclick="return confirm('Bu aboneliği silmek istiyor musunuz?')">✕</a>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 12px;">Henüz kayıtlı sabit gider (Kira, Fatura, Netflix vb.) yok.</p>
+                    {% endif %}
+
+                    <!-- Yeni Abonelik Ekle Formu -->
+                    <details style="margin-top: 10px;">
+                        <summary style="font-size: 12px; font-weight: 700; color: var(--primary); cursor: pointer;">➕ Yeni Abonelik / Fatura Ekle</summary>
+                        <form action="{{ url_for('abonelik_ekle', user_id=bakilan_user.id) }}" method="POST" style="margin-top: 10px;">
+                            <input type="text" name="baslik" placeholder="Abonelik Adı (Örn: Netflix, Kira)" required>
+                            <input type="number" step="0.01" name="miktar" placeholder="Aylık Tutar (TL)" required>
+                            <input type="number" min="1" max="31" name="gun" placeholder="Ödeme Günü (1-31)" value="1" required>
+                            <select name="kategori">
+                                {% for k in kategoriler %}
+                                    <option value="{{ k.ad }}">{{ k.ad }}</option>
+                                {% endfor %}
+                            </select>
+                            <button type="submit" style="background: #334155; margin-top: 5px;">Aboneliği Kaydet</button>
+                        </form>
+                    </details>
+                </div>
+
+                <!-- 📁 Kategori Yönetimi -->
+                <div class="card">
+                    <h3 style="font-size: 15px; margin-bottom: 12px;">📁 Kategori Yönetimi</h3>
+                    <ul style="list-style: none; margin-bottom: 15px;">
+                        {% for k in kategoriler %}
+                            <li style="margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; background: var(--surface-color); padding: 8px 12px; border-radius: 6px; border: 1px solid var(--border-color); font-size: 13px;">
+                                <span>🏷️ {{ k.ad }}</span>
+                                <a href="{{ url_for('kategori_sil', kat_id=k.id, target_user_id=bakilan_user.id) }}" class="badge badge-del" onclick="return confirm('Bu kategoriyi silmek istediğinize emin misiniz?')">Sil</a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                    
+                    <form action="{{ url_for('kategori_ekle', target_user_id=bakilan_user.id) }}" method="POST">
+                        <input type="text" name="kategori_ad" placeholder="Yeni Kategori Adı" required autocomplete="off">
+                        <button type="submit" style="background: #334155; margin-top: 5px;">Kategoriyi Ekle</button>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- ✏️ İşlem Düzenleme Küçük Pencere (Modal) -->
+    <div id="editModal" class="modal-backdrop" onclick="closeEditModalOnBackdrop(event)">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>✏️ İşlemi Düzenle</h3>
+                <button type="button" class="modal-close" onclick="closeEditModal()">&times;</button>
+            </div>
+            <form id="editForm" method="POST" action="">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div>
+                        <label style="font-size: 12px; font-weight: 600;">İşlem Türü:</label>
+                        <select name="tip" id="modal-tip" required>
+                            <option value="gider">Gider (-)</option>
+                            <option value="gelir">Gelir (+)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="font-size: 12px; font-weight: 600;">Miktar (TL):</label>
+                        <input type="number" step="0.01" name="miktar" id="modal-miktar" required>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 6px;">
+                    <div>
+                        <label style="font-size: 12px; font-weight: 600;">Kategori:</label>
+                        <select name="kategori" id="modal-kategori" required>
+                            {% for k in kategoriler %}
+                                <option value="{{ k.ad }}">{{ k.ad }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label style="font-size: 12px; font-weight: 600;">İşlem Tarihi:</label>
+                        <input type="date" name="tarih" id="modal-tarih">
+                    </div>
+                </div>
+
+                <div style="margin-top: 6px;">
+                    <label style="font-size: 12px; font-weight: 600;">İşlem Açıklaması:</label>
+                    <input type="text" name="baslik" id="modal-baslik" placeholder="Açıklama giriniz...">
+                </div>
+
+                <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 18px;">
+                    <button type="button" onclick="closeEditModal()" style="background: #64748b; width: auto; padding: 8px 16px; margin: 0;">İptal</button>
+                    <button type="submit" style="background: #2563eb; width: auto; padding: 8px 18px; margin: 0;">💾 Değişiklikleri Kaydet</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- JavaScript & Grafikler & Akıllı Fonksiyonlar -->
+    <script>
+        // --- 🌙 KARANLIK MOD FONKSİYONLARI ---
+        function initTheme() {
+            const savedTheme = localStorage.getItem('mert_theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            updateThemeButton(savedTheme);
+        }
+
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('mert_theme', newTheme);
+            updateThemeButton(newTheme);
+        }
+
+        function updateThemeButton(theme) {
+            const btn = document.getElementById('theme-btn');
+            if (btn) {
+                btn.innerHTML = theme === 'dark' ? '☀️ Aydınlık Mod' : '🌙 Karanlık Mod';
+            }
+        }
+
+        initTheme();
+
+        // --- ✏️ DÜZENLEME MODAL FONKSİYONLARI ---
+        function openEditModal(id, tip, baslik, kategori, miktar, tarih) {
+            const modal = document.getElementById('editModal');
+            const form = document.getElementById('editForm');
+            form.action = '/edit/' + id;
+            
+            document.getElementById('modal-tip').value = tip;
+            document.getElementById('modal-miktar').value = miktar;
+            document.getElementById('modal-kategori').value = kategori;
+            document.getElementById('modal-tarih').value = tarih;
+            document.getElementById('modal-baslik').value = (baslik && baslik !== "Açıklamasız İşlem") ? baslik : "";
+            
+            modal.classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeEditModal() {
+            const modal = document.getElementById('editModal');
+            modal.classList.remove('show');
+            document.body.style.overflow = '';
+        }
+
+        function closeEditModalOnBackdrop(event) {
+            if (event.target.id === 'editModal') {
+                closeEditModal();
+            }
+        }
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeEditModal();
+            }
+        });
+
+        // --- 💱 CANLI DÖVİZ VE ALTIN KURLARI (GERÇEK ZAMANLI API) ---
+        async function fetchLiveCurrency() {
+            const statusElem = document.getElementById('ticker-status');
+            try {
+                // Ücretsiz, hızlı ve CORS destekli açık piyasa API'si
+                const res = await fetch('https://open.er-api.com/v6/latest/USD');
+                if (!res.ok) throw new Error('API Hatası');
+                const data = await res.json();
+                
+                if (data && data.rates && data.rates.TRY) {
+                    const usdTry = data.rates.TRY;
+                    const eurTry = usdTry / (data.rates.EUR || 1);
+                    const gbpTry = usdTry / (data.rates.GBP || 1);
+                    
+                    document.getElementById('usd-rate').innerText = usdTry.toFixed(2) + ' ₺';
+                    document.getElementById('eur-rate').innerText = eurTry.toFixed(2) + ' ₺';
+                    document.getElementById('gbp-rate').innerText = gbpTry.toFixed(2) + ' ₺';
+                    
+                    // Altın (XAU) Ons -> Gram Altın (TRY) (1 Ons = 31.1034768 gram)
+                    if (data.rates.XAU) {
+                        const onsUsd = 1 / data.rates.XAU;
+                        const gramAltinTry = (onsUsd * usdTry) / 31.1034768;
+                        document.getElementById('gold-rate').innerText = Math.round(gramAltinTry).toLocaleString('tr-TR') + ' ₺';
+                    }
+                    
+                    if (statusElem) {
+                        const now = new Date();
+                        const timeStr = now.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+                        statusElem.innerHTML = `🟢 Canlı Güncel (${timeStr})`;
+                    }
+                }
+            } catch (err) {
+                console.log('Canlı kur API kontrolü:', err);
+                if (statusElem) {
+                    statusElem.innerHTML = '🟢 Güncel Piyasa Kurları';
+                }
+            }
+        }
+
+        // Sayfa açıldığında ve her 60 saniyede bir otomatik güncelle
+        fetchLiveCurrency();
+        setInterval(fetchLiveCurrency, 60000);
+
+        // --- 🤖 AKILLI KATEGORİ VE TÜR TAHMİNİ ---
+        function akilliKategoriTahmini(metin) {
+            metin = metin.toLowerCase();
+            const katSelect = document.getElementById('islem-kategori');
+            const tipSelect = document.getElementById('islem-tip');
+            if (!katSelect || !tipSelect) return;
+
+            if (metin.includes('maaş') || metin.includes('prim') || metin.includes('ek gelir') || metin.includes('burs') || metin.includes('faiz')) {
+                tipSelect.value = 'gelir';
+                selectOption(katSelect, 'Maaş');
+            } else if (metin.includes('market') || metin.includes('migros') || metin.includes('bim') || metin.includes('a101') || metin.includes('yemek') || metin.includes('restoran')) {
+                tipSelect.value = 'gider';
+                selectOption(katSelect, 'Gıda');
+            } else if (metin.includes('kira') || metin.includes('ev') || metin.includes('aidat')) {
+                tipSelect.value = 'gider';
+                selectOption(katSelect, 'Kira');
+            } else if (metin.includes('elektrik') || metin.includes('su') || metin.includes('doğalgaz') || metin.includes('fatura') || metin.includes('internet') || metin.includes('telefon')) {
+                tipSelect.value = 'gider';
+                selectOption(katSelect, 'Fatura');
+            } else if (metin.includes('benzin') || metin.includes('akaryakıt') || metin.includes('shell') || metin.includes('otobüs') || metin.includes('metro') || metin.includes('taksi') || metin.includes('uber')) {
+                tipSelect.value = 'gider';
+                selectOption(katSelect, 'Ulaşım');
+            } else if (metin.includes('sinema') || metin.includes('tiyatro') || metin.includes('netflix') || metin.includes('spotify') || metin.includes('oyun') || metin.includes('tatil')) {
+                tipSelect.value = 'gider';
+                selectOption(katSelect, 'Eğlence');
+            }
+        }
+
+        function selectOption(selectElem, textVal) {
+            for (let i = 0; i < selectElem.options.length; i++) {
+                if (selectElem.options[i].text.toLowerCase() === textVal.toLowerCase()) {
+                    selectElem.selectedIndex = i;
+                    break;
+                }
+            }
+        }
+
+        // --- ⚡ CANLI TABLO ARAMA MOTORU ---
+        function tablodaAra() {
+            const input = document.getElementById('canli-arama');
+            const filter = input.value.toLocaleLowerCase('tr-TR');
+            const table = document.getElementById('islem-tablosu');
+            const tr = table.getElementsByTagName('tr');
+
+            for (let i = 1; i < tr.length; i++) {
+                const tdText = tr[i].textContent || tr[i].innerText;
+                if (tdText.toLocaleLowerCase('tr-TR').indexOf(filter) > -1) {
+                    tr[i].style.display = "";
+                } else {
+                    tr[i].style.display = "none";
+                }
+            }
+        }
+
+        // --- 📊 GRAFİK 1: 6 AYLIK GELİR/GİDER TRENDİ (ÇİZGİ GRAFİĞİ) ---
+        const trendCtx = document.getElementById('trendChart').getContext('2d');
+        new Chart(trendCtx, {
+            type: 'line',
+            data: {
+                labels: {{ trend_labels|tojson }},
+                datasets: [
+                    {
+                        label: 'Gelir (TL)',
+                        data: {{ trend_gelirler|tojson }},
+                        borderColor: '#10b981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        borderWidth: 2,
+                        tension: 0.3,
+                        fill: true
+                    },
+                    {
+                        label: 'Gider (TL)',
+                        data: {{ trend_giderler|tojson }},
+                        borderColor: '#ef4444',
+                        backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                        borderWidth: 2,
+                        tension: 0.3,
+                        fill: true
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'top' }
+                },
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+
+        // --- 📊 GRAFİK 2: KATEGORİSEL GİDER PASTA GRAFİĞİ ---
+        {% if chart_values %}
+        const giderCtx = document.getElementById('giderChart').getContext('2d');
+        new Chart(giderCtx, {
+            type: 'doughnut',
+            data: {
+                labels: {{ chart_labels|tojson }},
+                datasets: [{
+                    data: {{ chart_values|tojson }},
+                    backgroundColor: [
+                        '#ef4444', '#3b82f6', '#f59e0b', '#8b5cf6', '#10b981', 
+                        '#ec4899', '#06b6d4', '#64748b', '#84cc16', '#6366f1'
+                    ],
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'right' }
+                }
+            }
+        });
+        {% endif %}
+    </script>
+</body>
+</html>

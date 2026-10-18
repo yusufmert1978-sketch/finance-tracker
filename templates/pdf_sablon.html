@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finans Raporu - {{ u.username }}</title>
+    <!-- html2pdf.js CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: #e2e8f0;
+            color: #1e293b;
+            line-height: 1.5;
+            padding-bottom: 40px;
+        }
+
+        /* Üst Kontrol Çubuğu (Yazdırma ve İndirme Butonları) */
+        .toolbar {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background: #1e293b;
+            color: #f8fafc;
+            padding: 12px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .toolbar-title {
+            font-size: 15px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .toolbar-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .btn-toolbar {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            border: none;
+        }
+
+        .btn-download {
+            background: #2563eb;
+            color: white;
+        }
+        .btn-download:hover {
+            background: #1d4ed8;
+            transform: translateY(-1px);
+        }
+
+        .btn-print {
+            background: #059669;
+            color: white;
+        }
+        .btn-print:hover {
+            background: #047857;
+            transform: translateY(-1px);
+        }
+
+        .btn-back {
+            background: #475569;
+            color: white;
+        }
+        .btn-back:hover {
+            background: #334155;
+        }
+
+        /* Bilgi İpucu */
+        .info-banner {
+            max-width: 850px;
+            margin: 15px auto 0 auto;
+            background: #dbeafe;
+            border: 1px solid #bfdbfe;
+            color: #1e40af;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Rapor A4 Belge Gövdesi */
+        .report-wrapper {
+            max-width: 850px;
+            margin: 20px auto;
+            background: #ffffff;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+            border: 1px solid #cbd5e1;
+        }
+
+        /* Resmi Başlık Bölümü */
+        .report-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            border-bottom: 2px solid #0f172a;
+            padding-bottom: 20px;
+            margin-bottom: 25px;
+        }
+
+        .brand-section h1 {
+            font-size: 22px;
+            font-weight: 800;
+            color: #0f172a;
+            letter-spacing: -0.5px;
+            text-transform: uppercase;
+        }
+
+        .brand-section p {
+            font-size: 13px;
+            color: #64748b;
+            margin-top: 4px;
+            font-weight: 500;
+        }
+
+        .report-meta {
+            text-align: right;
+        }
+
+        .report-badge {
+            display: inline-block;
+            background: #f1f5f9;
+            border: 1px solid #cbd5e1;
+            color: #334155;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 4px;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+        }
+
+        .report-meta p {
+            font-size: 12px;
+            color: #64748b;
+        }
+
+        /* Kullanıcı Bilgileri Tablosu / Kartı */
+        .user-info-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 16px 20px;
+            margin-bottom: 25px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px 24px;
+        }
+
+        .info-row {
+            font-size: 13px;
+            color: #475569;
+        }
+
+        .info-row strong {
+            color: #0f172a;
+            font-weight: 600;
+            min-width: 120px;
+            display: inline-block;
+        }
+
+        /* Finansal Özet Kartları */
+        .summary-cards {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            padding: 16px;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid transparent;
+        }
+
+        .card-income {
+            background: #ecfdf5;
+            border-color: #a7f3d0;
+            color: #065f46;
+        }
+
+        .card-expense {
+            background: #fef2f2;
+            border-color: #fecaca;
+            color: #991b1b;
+        }
+
+        .card-balance-pos {
+            background: #eff6ff;
+            border-color: #bfdbfe;
+            color: #1e40af;
+        }
+
+        .card-balance-neg {
+            background: #fff1f2;
+            border-color: #fecdd3;
+            color: #be123c;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+
+        .stat-value {
+            font-size: 20px;
+            font-weight: 800;
+        }
+
+        /* Bölüm Başlıkları */
+        .section-header {
+            font-size: 15px;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-left: 4px solid #2563eb;
+            padding-left: 10px;
+        }
+
+        /* Tablo Stilleri */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 25px;
+            font-size: 13px;
+        }
+
+        thead th {
+            background: #f1f5f9;
+            color: #334155;
+            font-weight: 700;
+            text-align: left;
+            padding: 10px 12px;
+            border-top: 1px solid #cbd5e1;
+            border-bottom: 2px solid #cbd5e1;
+        }
+
+        tbody td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #e2e8f0;
+            color: #334155;
+        }
+
+        tbody tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+
+        .badge-type {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .badge-gelir {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .badge-gider {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .amount-gelir {
+            color: #059669;
+            font-weight: 700;
+        }
+
+        .amount-gider {
+            color: #dc2626;
+            font-weight: 700;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 30px;
+            color: #64748b;
+            font-style: italic;
+            background: #f8fafc;
+            border-radius: 6px;
+        }
+
+        /* Kategori Özeti */
+        .category-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        .category-item {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            padding: 10px 14px;
+            border-radius: 6px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+        }
+
+        .category-name {
+            font-weight: 600;
+            color: #334155;
+        }
+
+        .category-amt {
+            font-weight: 700;
+            color: #dc2626;
+        }
+
+        /* Resmi Alt Bilgi ve İmza Alanı */
+        .report-footer {
+            margin-top: 40px;
+            border-top: 1px solid #e2e8f0;
+            padding-top: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+
+        .legal-notice {
+            font-size: 11px;
+            color: #94a3b8;
+            max-width: 450px;
+            line-height: 1.4;
+        }
+
+        .signature-box {
+            text-align: center;
+            width: 180px;
+            border-top: 1px dashed #64748b;
+            padding-top: 8px;
+            font-size: 12px;
+            color: #475569;
+            font-weight: 600;
+        }
+
+        /* Yazdırma (Print & PDF) Medya Kuralları */
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+            body {
+                background: #ffffff !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            .report-wrapper {
+                max-width: 100% !important;
+                margin: 0 !important;
+                padding: 10mm 12mm !important;
+                border: none !important;
+                box-shadow: none !important;
+                border-radius: 0 !important;
+            }
+            @page {
+                size: A4 portrait;
+                margin: 8mm;
+            }
+            table {
+                page-break-inside: auto;
+            }
+            tr {
+                page-break-inside: avoid;
+                page-break-after: auto;
+            }
+            thead {
+                display: table-header-group;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Üst Kontrol Çubuğu (Yazdırma ve İndirme Seçenekleri) -->
+    <div class="toolbar no-print">
+        <div class="toolbar-title">
+            <span>📄</span>
+            <span>Finans Raporu: <strong>{{ u.username }}</strong> ({{ tarih_rapor }})</span>
+        </div>
+        <div class="toolbar-actions">
+            <button id="btn-indir" onclick="indirPDF()" class="btn-toolbar btn-download">
+                <span>📥</span>
+                <span>PDF İndir (.pdf)</span>
+            </button>
+            <button onclick="window.print()" class="btn-toolbar btn-print">
+                <span>🖨️</span>
+                <span>Yazdır / PDF Kaydet</span>
+            </button>
+            <a href="{{ url_for('user_detail', user_id=u.id) }}" class="btn-toolbar btn-back">
+                <span>⬅️</span>
+                <span>Panele Dön</span>
+            </a>
+        </div>
+    </div>
+
+    <div class="info-banner no-print">
+        <span>💡</span>
+        <span><strong>İpucu:</strong> Doğrudan dosya indirmek için <strong>"PDF İndir (.pdf)"</strong> butonuna tıklayabilir veya tarayıcınızın yazdırma menüsüyle yüksek çözünürlüklü PDF oluşturmak için <strong>"Yazdır / PDF Kaydet"</strong> butonunu kullanabilirsiniz.</span>
+    </div>
+
+    <!-- Rapor Ana Belge Alanı (PDF'e dönüştürülecek alan) -->
+    <div class="report-wrapper" id="rapor-icerik">
+        
+        <!-- Başlık ve Kurum Bilgisi -->
+        <div class="report-header">
+            <div class="brand-section">
+                <h1>MERT FİNANSAL YÖNETİM SİSTEMİ</h1>
+                <p>Resmi Müşteri Hesap Ekstresi ve Finansal Durum Raporu</p>
+            </div>
+            <div class="report-meta">
+                <div class="report-badge">Kayıt No: {{ tarih_kod }}-{{ u.id }}</div>
+                <p><strong>Düzenleme:</strong> {{ tarih_rapor }}</p>
+                <p><strong>Sistem Durumu:</strong> Onaylı Kayıt</p>
+            </div>
+        </div>
+
+        <!-- Müşteri ve Hesap Bilgileri Kartı -->
+        <div class="user-info-card">
+            <div class="info-row">
+                <strong>Hesap Sahibi:</strong> {{ u.username }}
+            </div>
+            <div class="info-row">
+                <strong>Hesap Rolü:</strong> {% if u.role == 'admin' %}Sistem Yöneticisi (Admin){% else %}Bireysel / Standart Kullanıcı{% endif %}
+            </div>
+            <div class="info-row">
+                <strong>E-Posta Adresi:</strong> {{ u.email if u.email else 'Kayıtlı Değil' }}
+            </div>
+            <div class="info-row">
+                <strong>Telefon No:</strong> {{ u.telefon if u.telefon else 'Kayıtlı Değil' }}
+            </div>
+            <div class="info-row">
+                <strong>Şirket / Kurum:</strong> {% if u.sirket %}{{ u.sirket.upper() }}{% else %}Bireysel Hesap (Şirketsiz){% endif %}
+            </div>
+            <div class="info-row">
+                <strong>T.C. / Kimlik No:</strong> {{ u.tc_no if u.tc_no else 'Belirtilmedi' }}
+            </div>
+        </div>
+
+        <!-- Finansal İstatistik Özeti -->
+        <div class="summary-cards">
+            <div class="stat-card card-income">
+                <div class="stat-label">Toplam Gelir</div>
+                <div class="stat-value">+{{ "%.2f"|format(gelir) }} ₺</div>
+            </div>
+            <div class="stat-card card-expense">
+                <div class="stat-label">Toplam Gider</div>
+                <div class="stat-value">-{{ "%.2f"|format(gider) }} ₺</div>
+            </div>
+            <div class="stat-card {% if net >= 0 %}card-balance-pos{% else %}card-balance-neg{% endif %}">
+                <div class="stat-label">Net Bakiye Durumu</div>
+                <div class="stat-value">{{ "%.2f"|format(net) }} ₺</div>
+            </div>
+        </div>
+
+        <!-- Kategori Bazlı Harcama Dağılımı (Varsa) -->
+        {% if kategori_ozet %}
+        <div class="section-header">
+            <span>🏷️ Gider Kategori Dağılımı</span>
+            <span style="font-size: 11px; font-weight: normal; color: #64748b;">(Toplam Harcama Kalemleri)</span>
+        </div>
+        <div class="category-grid">
+            {% for kat, amt in kategori_ozet.items() %}
+            <div class="category-item">
+                <span class="category-name">{{ kat }}</span>
+                <span class="category-amt">{{ "%.2f"|format(amt) }} ₺</span>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Detaylı İşlem Hareketleri Tablosu -->
+        <div class="section-header">
+            <span>📋 Hesap Hareketleri Dökümü</span>
+            <span style="font-size: 11px; font-weight: normal; color: #64748b;">Toplam {{ islemler|length }} İşlem Kaydı</span>
+        </div>
+
+        {% if islemler %}
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 15%;">Tarih</th>
+                    <th style="width: 35%;">İşlem Açıklaması</th>
+                    <th style="width: 20%;">Kategori</th>
+                    <th style="width: 15%;">İşlem Türü</th>
+                    <th style="width: 15%; text-align: right;">Tutar</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for i in islemler %}
+                <tr>
+                    <td>{{ i.tarih.strftime('%d.%m.%Y') }}</td>
+                    <td><strong>{{ i.baslik }}</strong></td>
+                    <td>{{ i.kategori }}</td>
+                    <td>
+                        <span class="badge-type {% if i.tip == 'gelir' %}badge-gelir{% else %}badge-gider{% endif %}">
+                            {{ i.tip }}
+                        </span>
+                    </td>
+                    <td style="text-align: right;" class="{% if i.tip == 'gelir' %}amount-gelir{% else %}amount-gider{% endif %}">
+                        {% if i.tip == 'gelir' %}+{% else %}-{% endif %}{{ "%.2f"|format(i.miktar) }} ₺
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="empty-state">
+            Bu hesaba ait herhangi bir gelir veya gider kaydı bulunamadı.
+        </div>
+        {% endif %}
+
+        <!-- Alt Bilgi ve Onay / Kaşe Alanı -->
+        <div class="report-footer">
+            <div class="legal-notice">
+                <p>⚠️ <strong>Bilgilendirme:</strong> Bu finansal hesap özeti dökümü, Mert Kişisel ve Kurumsal Finans Yönetim Sistemi veri tabanı kayıtları esas alınarak oluşturulmuştur. Elektronik ortamda üretilmiş olup ilgili hesap dökümünü temsil eder.</p>
+                <p style="margin-top: 4px;">Sistem Doğrulama Kodu: <code>MF-SEC-{{ u.id }}-{{ tarih_kod }}</code></p>
+            </div>
+            <div class="signature-box">
+                <p>Yetkili Sistem Onayı</p>
+                <p style="font-size: 10px; color: #94a3b8; margin-top: 2px;">(Elektronik İmzalıdır)</p>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- PDF İndirme JavaScript Kodu -->
+    <script>
+        function indirPDF() {
+            const btn = document.getElementById('btn-indir');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<span>⏳</span><span>PDF Hazırlanıyor...</span>';
+            btn.disabled = true;
+
+            const element = document.getElementById('rapor-icerik');
+            
+            // html2pdf yapılandırma ayarları
+            const opt = {
+                margin:       [10, 10, 10, 10], // mm
+                filename:     'Finans_Raporu_{{ u.username }}_{{ tarih_kod }}.pdf',
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true, letterRendering: true, scrollY: 0 },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            // PDF oluştur ve indir
+            if (typeof html2pdf !== 'undefined') {
+                html2pdf().set(opt).from(element).save().then(function() {
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                }).catch(function(err) {
+                    console.error('PDF oluşturma hatası:', err);
+                    alert('PDF indirme sırasında bir hata oluştu. Yazdırma penceresi açılıyor...');
+                    window.print();
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                });
+            } else {
+                // CDN engellendiyse tarayıcı yazdırma penceresini aç
+                alert('Doğrudan indirme kütüphanesi yüklenemedi. Tarayıcının "PDF Olarak Kaydet" seçeneğini kullanabilirsiniz.');
+                window.print();
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>
